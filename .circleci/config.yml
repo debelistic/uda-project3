@@ -194,13 +194,14 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["1d:32:d5:34:ed:d8:c3:12:b6:9f:78:ec:b7:21:35:f9"]
+          fingerprints:
+            - "1d:32:d5:34:ed:d8:c3:12:b6:9f:78:ec:b7:21:35:f9"
       - attach_workspace:
           at: ~/
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible tar gzip aws-cli openssh
+            apk add --update --no-cache ansible tar gzip aws-cli openssh
       - run:
           name: Configure server
           command: |
@@ -208,8 +209,8 @@ jobs:
             cd .circleci/ansible
             ls -al
             ansible-playbook -i inventory.txt configure-server.yml
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          no_output_timeout: "30m"
+      - destroy-environment
 
       # Here's where you will add some code to rollback on failure      
 
