@@ -176,6 +176,7 @@ jobs:
             --filters "Name=tag:Project,Values=udacity" \
             --region=us-east-1 \
             --output text >> inventory
+            cat ~/project/.circleci/ansible/inventory.txt
       - run:
           name: Install tar utility
           command: |
