@@ -187,30 +187,30 @@ jobs:
       - destroy-environment
       # Here's where you will add some code to rollback on failure      
 
-  configure-infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
-      # Docker image here that supports Ansible
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "1d:32:d5:34:ed:d8:c3:12:b6:9f:78:ec:b7:21:35:f9"
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update --no-cache ansible tar gzip aws-cli openssh
-      - run:
-          name: Configure server
-          command: |
-            pwd
-            cd .circleci/ansible
-            ls -al
-            ansible-playbook -i inventory.txt configure-server.yml
-          no_output_timeout: "30m"
-      - destroy-environment
+  # configure-infrastructure:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #     # Docker image here that supports Ansible
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "1d:32:d5:34:ed:d8:c3:12:b6:9f:78:ec:b7:21:35:f9"
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --update --no-cache ansible tar gzip aws-cli openssh
+  #     - run:
+  #         name: Configure server
+  #         command: |
+  #           pwd
+  #           cd .circleci/ansible
+  #           ls -al
+  #           ansible-playbook -i inventory.txt configure-server.yml
+  #         no_output_timeout: "30m"
+  #     - destroy-environment
 
       # Here's where you will add some code to rollback on failure      
 
@@ -347,8 +347,8 @@ workflows:
           filters:
             branches:
               only: [test-feature-branch]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
