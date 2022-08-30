@@ -149,11 +149,11 @@ jobs:
       # Docker image here that supports AWS CLI
     steps:
       # Checkout code from git
+      - checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
-            pwd
-            ls
+            ls -a
             cat .circleci/files/backend.yml
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
