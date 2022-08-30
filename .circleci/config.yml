@@ -153,6 +153,7 @@ jobs:
           name: Ensure back-end infrastructure exists
           command: |
             pwd
+            ls
             cat .circleci/files/backend.yml
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
