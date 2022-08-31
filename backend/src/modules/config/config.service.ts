@@ -96,7 +96,7 @@ export class ConfigService {
   }
 
   get TypeOrmDatabase(): TypeOrmModuleOptions {
-    console.log({
+    console.log('do[p=====', {
       type: this.envConfig.TYPEORM_CONNECTION,
       host: this.envConfig.TYPEORM_HOST,
       port: this.envConfig.TYPEORM_PORT,
