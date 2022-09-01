@@ -7,14 +7,12 @@ commands:
       workflow_id:
         type: string     
     steps:
-      - environment:
-          WORKFLOW_ID: << parameters.workflow_id >>
       - run:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-backend-${WORKFLOW_ID}
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${WORKFLOW_ID}
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -223,7 +221,6 @@ jobs:
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
-      # Docker image here that supports NodeJS
     steps:
       - checkout
       - restore_cache:
