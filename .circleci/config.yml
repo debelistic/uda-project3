@@ -30,7 +30,6 @@ commands:
               npm install
               npm run build
               npm run migrations:revert              
-            
             fi
             
 jobs:
@@ -333,6 +332,7 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment
+      - revert-migrations
       # Here's where you will add some code to rollback on failure  
 
 #   smoke-test:
