@@ -226,7 +226,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt-get install awscli
+            sudo python --version
+            sudo pip --version
+            sudo pip install awscli
+            sudo aws — version
       - run:
           name: Run migrations
           command: |
@@ -270,7 +273,6 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            # your code here
             export BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
@@ -336,28 +338,43 @@ jobs:
       - revert-migrations
       # Here's where you will add some code to rollback on failure  
 
-#   smoke-test:
-#     docker:
-#       # Lightweight Docker image 
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Get backend url
-#           command: |
-#             # your code here
-#       - run:
-#           name: Backend smoke test.
-#           command: |
-#             # your code here
-#       - run:
-#           name: Frontend smoke test.
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  smoke-test:
+    docker:
+      - image: python:3.11-rc-alpine
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update --no-cache ansible tar gzip aws-cli nodejs npm curl
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --region=us-east-1 \
+            --output text)
+
+            echo ${BACKEND_IP}
+
+            export BACKEND=$(echo $BACKEND_IP | grep -o `[^ ]*$`)
+
+            echo $BACKEND
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL=${API_URL}"
+
+            echo "sleep for a minute"
+            sleep 60
+      - run:
+          name: Backend smoke test.
+          command: |
+            # your code here
+      - run:
+          name: Frontend smoke test.
+          command: |
+            # your code here
+      # Here's where you will add some code to rollback on failure  
 
 #   cloudfront-update:
 #     docker:
