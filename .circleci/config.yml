@@ -226,7 +226,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt-get install aws-cli
+            sudo apt-get install awscli
       - run:
           name: Run migrations
           command: |
@@ -321,6 +321,7 @@ jobs:
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
             echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> ".env"
             echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> ".env"
+            cat .env
 
             npm i
             npm run build
