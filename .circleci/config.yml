@@ -225,14 +225,6 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      # - run:
-      #     name: Install dependencies
-      #     command: |
-      #       sudo python --version
-      #       sudo apt-get install python-pip
-      #       sudo pip --version
-      #       sudo pip install awscli
-      #       sudo aws — version
       - run:
           name: Run migrations
           command: |
@@ -250,8 +242,6 @@ jobs:
             then
                 curl https://kvdb.io/4FH6Ej8TUwS7MVLepXVtsC/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      # - destroy-environment
-     # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
     docker:
