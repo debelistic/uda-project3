@@ -344,7 +344,7 @@ jobs:
           command: |
             apk add --update --no-cache ansible tar gzip aws-cli nodejs npm curl
       - run:
-          name: Get backend url
+          name: Get backend url and perform Backend smoke test.
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
@@ -354,7 +354,7 @@ jobs:
 
             echo ${BACKEND_IP}
 
-            export BACKEND=$(echo $BACKEND_IP | grep -o `[^ ]*$`)
+            export BACKEND=$(echo $BACKEND_IP | grep -o '[^ ]*$')
 
             echo $BACKEND
             export API_URL="http://${BACKEND_IP}:3030"
@@ -362,15 +362,14 @@ jobs:
 
             echo "sleep for a minute"
             sleep 60
-      - run:
-          name: Backend smoke test.
-          command: |
+
             if curl "${API_URL}/api/status" | grep "ok"
             then
                 return 0
             else
                 return 1
             fi
+            
       - run:
           name: Frontend smoke test.
           command: |
