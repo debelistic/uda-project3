@@ -28,7 +28,7 @@
   become: true
   copy:
     src: ~/project/artifact.tar.gz
-    destination: /home/ubuntu/backend_api/artifact.tar.gz
+    dest: /home/ubuntu/backend_api/artifact.tar.gz
 
 - name: "start app"
   become: true
