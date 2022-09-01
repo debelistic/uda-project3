@@ -4,32 +4,35 @@ commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here   
+      workflow_id:
+        type: string     
     steps:
+      - environment:
+          WORKFLOW_ID: << parameters.workflow_id >>
       - run:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name udapeople-backend-${WORKFLOW_ID}
+            aws cloudformation delete-stack --stack-name udapeople-frontend-${WORKFLOW_ID}
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      # Add parameter here     
+       workflow_id:
+        type: string    
     steps:
       - run:
           name: Revert migrations
           # Add when this will run
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
+            SUCCESS=$(curl --insecure  https://kvdb.io/4FH6Ej8TUwS7MVLepXVtsC/migration_<< parameters.workflow_id >>)
+            # Logic for reverting the database state
+            if (( $SUCCESS == 1 ));
             then
-              cd ~/project/backend
-              npm install
-              npm run build
-              npm run migrations:revert              
+                cd ~/project/backend
+                npm install
+                npm run migration:revert
             fi
             
 jobs:
@@ -185,7 +188,8 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       # Here's where you will add some code to rollback on failure      
 
   configure-infrastructure:
@@ -211,7 +215,8 @@ jobs:
             ls -al
             ansible-playbook -i inventory.txt configure-server.yml
           no_output_timeout: "30m"
-      - destroy-environment
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
       # Here's where you will add some code to rollback on failure      
 
@@ -223,14 +228,14 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run:
-          name: Install dependencies
-          command: |
-            sudo python --version
-            sudo apt-get install python-pip
-            sudo pip --version
-            sudo pip install awscli
-            sudo aws — version
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       sudo python --version
+      #       sudo apt-get install python-pip
+      #       sudo pip --version
+      #       sudo pip install awscli
+      #       sudo aws — version
       - run:
           name: Run migrations
           command: |
@@ -248,7 +253,7 @@ jobs:
             then
                 curl https://kvdb.io/4FH6Ej8TUwS7MVLepXVtsC/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      - destroy-environment
+      # - destroy-environment
      # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
@@ -290,7 +295,8 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      - destroy-environment
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
 #       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
@@ -335,8 +341,10 @@ jobs:
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
-      - destroy-environment
-      - revert-migrations
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       # Here's where you will add some code to rollback on failure  
 
   smoke-test:
@@ -388,22 +396,30 @@ jobs:
             else
               return 1
             fi
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       # Here's where you will add some code to rollback on failure  
 
-#   cloudfront-update:
-#     docker:
-#       # Docker image here that supports AWS CLI
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Update cloudfront distribution
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            yum install tar gzip -y
+      - run:
+          name: get old stack workflow id
+          command: |
+            # export OldWorkflowID=
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            # your code here
+      # Here's where you will add some code to rollback on failure  
 
 # cleanup:
 #     docker:
@@ -451,8 +467,8 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
       # - cleanup:
