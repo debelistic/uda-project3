@@ -9,6 +9,7 @@ Parameters:
 Resources:
   WebsiteBucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
     Properties:
       BucketName: !Sub "udapeople-${ID}"
       AccessControl: PublicRead
