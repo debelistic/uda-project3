@@ -270,6 +270,7 @@ jobs:
             --region=us-east-1 \
             --output text)
             export API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             echo "${API_URL}"
             cat frontend/.env
       - run:
